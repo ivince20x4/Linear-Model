@@ -32,9 +32,9 @@ use mean 3 and sd 2.5 for X normal distribution sampling.
 Let's look at the residuals of normal distribution. 
 
 ```{r}
-set.seed(111)
+set.seed(12)
 x = rnorm(nSample, mean=3,sd=2.5)
-set.seed(1112131415)
+set.seed(222)
 Eps = rnorm(nSample, mean=0, sd=1.5)
 
 y <- (a*x)+ b+ Eps
@@ -58,7 +58,7 @@ Let's look at the residuals of uniform distribution.
 
 ```{r}
 x = rnorm(nSample, mean=3,sd=2.5)
-set.seed(1112131415)
+set.seed(222)
 Eps = runif(nSample, min=-4.33, max=4.33)
 y <- (a*x)+ b+ Eps
 
@@ -80,7 +80,7 @@ Let's look at the residuals of cauchy distribution.
 
 ```{r}
 x = rnorm(nSample, mean=3,sd=2.5)
-set.seed(1112131415)
+set.seed(222)
 Eps = rcauchy(nSample, location=-0, scale=0.3)
 y <- (a*x)+ b+ Eps
 
@@ -134,7 +134,7 @@ plot(sd.process,type="l")
 
 Simulate the linear model residuals Eps with changing standard deviations.
 ```{r}
-set.seed(1112131415);
+set.seed(222);
 Eps<-rnorm(nSample)*sd.process
 
 ```
