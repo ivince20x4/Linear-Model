@@ -1,0 +1,190 @@
+---
+title: "Linear Models"
+author: "Vincent Lee"
+date: "10/13/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Understanding common assumptions behind the linear model
+
+First, let's fix the slope and intercept for the linear model (Y=ax+b+Eps)
+
+```{r}
+# Slope
+a<-.8 
+#Intercept
+b<-.1
+#select a sample
+nSample<-1000
+```
+
+
+Now, let's look at 4 different models and its residuals.
+The residuals will result in different Y for similar X,a, and b. 
+
+## First Model- Normal distribution
+
+use mean 3 and sd 2.5 for X normal distribution sampling.
+Let's look at the residuals of normal distribution. 
+
+```{r}
+set.seed(111)
+x = rnorm(nSample, mean=3,sd=2.5)
+set.seed(1112131415)
+Eps = rnorm(nSample, mean=0, sd=1.5)
+
+y <- (a*x)+ b+ Eps
+
+LinearModel1 <- data.frame(cbind(y,x,Eps))
+head(LinearModel1)
+plot(LinearModel1$x, LinearModel1$y)
+```
+
+Check the residuals
+
+```{r}
+plot(LinearModel1$Eps,type="l")
+```
+
+
+## Second model
+
+use mean 3 and sd 2.5 for X normal distribution sampling.
+Let's look at the residuals of uniform distribution. 
+
+```{r}
+x = rnorm(nSample, mean=3,sd=2.5)
+set.seed(1112131415)
+Eps = runif(nSample, min=-4.33, max=4.33)
+y <- (a*x)+ b+ Eps
+
+LinearModel2 <- data.frame(cbind(y,x,Eps))
+head(LinearModel2)
+plot(LinearModel2$x, LinearModel2$y)
+```
+
+Check the residuals
+
+```{r}
+plot(LinearModel2$Eps,type="l")
+```
+
+## Third model - Cauchy
+
+use mean 3 and sd 2.5 for X normal distribution sampling.
+Let's look at the residuals of cauchy distribution. 
+
+```{r}
+x = rnorm(nSample, mean=3,sd=2.5)
+set.seed(1112131415)
+Eps = rcauchy(nSample, location=-0, scale=0.3)
+y <- (a*x)+ b+ Eps
+
+LinearModel3 <- data.frame(cbind(y,x,Eps))
+head(LinearModel3)
+plot(LinearModel3$x, LinearModel3$y)
+```
+
+Check the residuals
+
+```{r}
+plot(LinearModel3$Eps,type="l")
+```
+
+
+What is the standard deviation of the residuals?
+
+```{r}
+sd(LinearModel3$Eps)
+```
+
+The standard deviation is very different for different Cauchy sample residuals 
+```{r}
+eps1<-rcauchy(n=nSample,location=0,scale=.3)
+eps2<-rcauchy(n=nSample,location=0,scale=.3)
+eps3<-rcauchy(n=nSample,location=0,scale=.3)
+eps4<-rcauchy(n=nSample,location=0,scale=.3)
+eps5<-rcauchy(n=nSample,location=0,scale=.3)
+c(sd(eps1),sd(eps2),sd(eps3),sd(eps4),sd(eps5))
+```
+
+
+## Fourth model
+
+use mean 3 and sd 2.5 for X normal distribution sampling.
+Let's look at the residuals of heteroscedastic process (different variance in samples)
+
+```{r}
+#Create the process of standard deviations in which the first 50 observations have sigma=2, followed by 75 observations with sigma=3.4, followed by 75 observations with sigma=0.8 and concluded by 50 observations with sigma=2.6.
+
+sd.Values<-c(2,3.4,.8,2.6)
+sd.process<-rep(c(rep(sd.Values[1],50),
+                  rep(sd.Values[2],75),
+                  rep(sd.Values[3],75),
+                  rep(sd.Values[4],50)),
+            4)
+            
+plot(sd.process,type="l")
+```
+
+
+Simulate the linear model residuals Eps with changing standard deviations.
+```{r}
+set.seed(1112131415);
+Eps<-rnorm(nSample)*sd.process
+
+```
+
+plot the residuals
+```{r}
+plot(Eps,type="l")
+```
+
+Observe how heteroscedasticity transforms normal distribution into leptokurtic distribution
+
+```{r}
+Xvariable<-(100*floor(min(Eps))):(100*ceiling(max(Eps)))
+Xvariable<-Xvariable/100
+# Plot the sample distribution and the theo. distribution
+plot(Xvariable,dnorm(Xvariable,mean=mean(Eps),sd=sd(Eps)),type="l",
+      ylim=c(0,.3),col="black",ylab="Distribution of Eps",xlab="")
+lines(density(Eps),col="red")
+```
+
+Generate LinearModel4.
+Plot it.
+```{r}
+y<-a*x+b+Eps
+LinearModel4<-as.data.frame(cbind(y=y,x=y))
+plot(LinearModel4$x,LinearModel4$y)
+```
+
+
+Effects of residual distribution of correlation
+
+Calculate and compare the estimated correlation for all the models.
+
+```{r}
+c(cor(LinearModel1$x,LinearModel1$y)^2,
+  cor(LinearModel2$x,LinearModel2$y)^2,
+  cor(LinearModel3$x,LinearModel3$y)^2,
+  cor(LinearModel4$x,LinearModel4$y)^2)
+```
+
+Each of the correlation is different for different models due to the differences in the errors
+
+VALIDATION USING LM FUNCTION
+
+```{r}
+m1<-lm(y~x,data=LinearModel1)
+summary(m1)
+```
+
+```{r}
+summary(m1)$r.squared
+```
+
